@@ -1,0 +1,16 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:80"         
+    restart: unless-stopped
+    networks:
+      - backend_net
+
+networks:
+  backend_net:
+    external: true
+    name: trainers-manager_training_net 
