@@ -47,7 +47,12 @@ export const api = {
 function lowerKeys(obj) {
   const out = {};
   for (const [k, v] of Object.entries(obj)) {
-    const key = k.charAt(0).toLowerCase() + k.slice(1);
+    let key;
+    if (k === "ID") {
+      key = "id";
+    } else {
+      key = k.charAt(0).toLowerCase() + k.slice(1);
+    }
     out[key] = v;
   }
   return out;
