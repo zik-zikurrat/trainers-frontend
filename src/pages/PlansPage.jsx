@@ -21,7 +21,7 @@ export function PlansPage() {
 
   function startEdit(p) {
     setEditingId(p.id);
-    setEditFields({ Plan: p.plan || "", Accent: p.accent || "", Skills: p.skills || "" });
+    setEditFields({ plan: p.plan || "", accent: p.accent || "", skills: p.skills || "" });
   }
 
   async function saveEdit(id) {
@@ -51,18 +51,18 @@ export function PlansPage() {
               <div className="row">
                 <div>
                   <label>Акцент</label>
-                  <input value={editFields.Accent}
-                    onChange={(e) => setEditFields(f => ({ ...f, Accent: e.target.value }))} />
+                  <input value={editFields.accent}
+                    onChange={(e) => setEditFields(f => ({ ...f, accent: e.target.value }))} />
                 </div>
                 <div>
                   <label>Навыки</label>
-                  <input value={editFields.Skills}
-                    onChange={(e) => setEditFields(f => ({ ...f, Skills: e.target.value }))} />
+                  <input value={editFields.skills}
+                    onChange={(e) => setEditFields(f => ({ ...f, skills: e.target.value }))} />
                 </div>
               </div>
               <label>Текст плана</label>
-              <textarea value={editFields.Plan} style={{ minHeight: 200 }}
-                onChange={(e) => setEditFields(f => ({ ...f, Plan: e.target.value }))} />
+              <textarea value={editFields.plan} style={{ minHeight: 200 }}
+                onChange={(e) => setEditFields(f => ({ ...f, plan: e.target.value }))} />
               <div className="row" style={{ marginTop: 10 }}>
                 <button onClick={() => saveEdit(p.id)}>Сохранить</button>
                 <button className="ghost" style={{ marginTop: 16 }}
