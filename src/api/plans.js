@@ -8,5 +8,6 @@ export const plansApi = {
     );
   },
   generate: (data) => api.post("/generate", data),
+  getTask: (id) => api.get(`/generate/${id}`),
   update: (id, data) => api.patch(`/plan/${id}`, data),
 };

@@ -1,10 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { plansApi } from "../api/plans";
 import { groupsApi } from "../api/groups";
 import { structuresApi } from "../api/structures";
 import { useResource } from "../hooks/useResource";
 import { useToast } from "../hooks/useToast";
 import { Loading } from "../components/States";
+
+const POLL_INTERVAL = 3000;
+const POLL_TIMEOUT = 5 * 60 * 1000;
 
 export function GeneratePage() {
   const groupsFetcher = useCallback(() => groupsApi.list(), []);
@@ -16,18 +19,51 @@ export function GeneratePage() {
   const [trainType, setTrainType] = useState("");
   const [structureId, setStructureId] = useState("");
   const [busy, setBusy] = useState(false);
+  const pollRef = useRef(null);
+
+  function stopPolling() {
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
+    }
+  }
+
+  function startPolling(taskId, deadline) {
+    if (Date.now() > deadline) {
+      setBusy(false);
+      toast("Превышено время ожидания генерации", "error");
+      return;
+    }
+    pollRef.current = setTimeout(async () => {
+      try {
+        const { status } = await plansApi.getTask(taskId);
+        if (status === "DONE") {
+          setBusy(false);
+          toast("Генерация завершена успешно", "ok");
+        } else if (status === "ERROR") {
+          setBusy(false);
+          toast("Ошибка генерации", "error");
+        } else {
+          startPolling(taskId, deadline);
+        }
+      } catch {
+        startPolling(taskId, deadline);
+      }
+    }, POLL_INTERVAL);
+  }
 
   async function generate() {
     if (!trainType) { toast("Введи тип тренировки", "error"); return; }
     if (!structureId) { toast("Выбери структуру", "error"); return; }
+    stopPolling();
     setBusy(true);
     try {
-      await plansApi.generate({ train_type: trainType, structure_id: structureId });
-      toast("Генерация запущена — план появится во вкладке «Планы»", "ok");
+      const { task_id } = await plansApi.generate({ train_type: trainType, structure_id: structureId });
+      toast("Генерация запущена…", "ok");
+      startPolling(task_id, Date.now() + POLL_TIMEOUT);
     } catch (e) {
-      toast(e.message, "error");
-    } finally {
       setBusy(false);
+      toast(e.message, "error");
     }
   }
 
