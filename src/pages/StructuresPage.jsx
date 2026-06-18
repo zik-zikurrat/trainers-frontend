@@ -3,7 +3,6 @@ import { structuresApi } from "../api/structures";
 import { useResource } from "../hooks/useResource";
 import { useToast } from "../hooks/useToast";
 import { Loading, ErrorMsg, Empty } from "../components/States";
-import { ShortId } from "../components/ShortId";
 
 export function StructuresPage() {
   const fetcher = useCallback(() => structuresApi.list(), []);
@@ -87,7 +86,6 @@ export function StructuresPage() {
               <>
                 <div className="item__main">
                   {s.structure}
-                  <div className="item__meta"><ShortId id={s.id} /></div>
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button className="ghost" onClick={() => startEdit(s)}>Изменить</button>
