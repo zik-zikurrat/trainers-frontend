@@ -3,7 +3,6 @@ import { exercisesApi } from "../api/exercises";
 import { useResource } from "../hooks/useResource";
 import { useToast } from "../hooks/useToast";
 import { Loading, ErrorMsg, Empty } from "../components/States";
-import { ShortId } from "../components/ShortId";
 
 export function ExercisesPage() {
   const fetcher = useCallback(() => exercisesApi.list(), []);
@@ -111,7 +110,6 @@ export function ExercisesPage() {
                   <span className="pill">{e.muscle}</span>
                   {e.position && <span className="pill">{e.position}</span>}
                   {e.description}
-                  <div className="item__meta"><ShortId id={e.id} /></div>
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button className="ghost" onClick={() => startEdit(e)}>Изменить</button>
