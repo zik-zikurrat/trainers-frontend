@@ -1,16 +1,37 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { plansApi } from "../api/plans";
 import { useResource } from "../hooks/useResource";
+import { useToast } from "../hooks/useToast";
 import { Loading, ErrorMsg, Empty } from "../components/States";
 
 export function PlansPage() {
   const fetcher = useCallback(() => plansApi.list(), []);
   const { data, loading, error, reload } = useResource(fetcher);
+  const toast = useToast();
 
+  const [editingId, setEditingId] = useState(null);
+  const [editFields, setEditFields] = useState({});
+
+  // Pause auto-refresh while editing to avoid overwriting form state
   useEffect(() => {
+    if (editingId) return;
     const t = setInterval(reload, 5000);
     return () => clearInterval(t);
-  }, [reload]);
+  }, [reload, editingId]);
+
+  function startEdit(p) {
+    setEditingId(p.id);
+    setEditFields({ Plan: p.plan || "", Accent: p.accent || "", Skills: p.skills || "" });
+  }
+
+  async function saveEdit(id) {
+    try {
+      await plansApi.update(id, editFields);
+      toast("Сохранено", "ok");
+      setEditingId(null);
+      reload();
+    } catch (e) { toast(e.message, "error"); }
+  }
 
   return (
     <div>
@@ -19,19 +40,50 @@ export function PlansPage() {
 
       {loading && data.length === 0 && <Loading />}
       {error && <ErrorMsg message={error} />}
-      {!loading && !error && data.length === 0 && <Empty>Пока нет планов. Сгенерируй первый во вкладке «Генерация».</Empty>}
+      {!loading && !error && data.length === 0 && (
+        <Empty>Пока нет планов. Сгенерируй первый во вкладке «Генерация».</Empty>
+      )}
 
       {data.map((p) => (
         <div className="plan" key={p.id}>
-          <div className="plan__head">
-            <span className="pill pill--accent">{p.accent || "—"}</span>
-            {p.skills && <span className="pill">{p.skills}</span>}
-            {p.status && <span className="pill">{p.status}</span>}
-            <span className="plan__when">
-              {p.created_at ? new Date(p.created_at).toLocaleString("ru-RU") : ""}
-            </span>
-          </div>
-          <div className="plan__text">{p.plan}</div>
+          {editingId === p.id ? (
+            <>
+              <div className="row">
+                <div>
+                  <label>Акцент</label>
+                  <input value={editFields.Accent}
+                    onChange={(e) => setEditFields(f => ({ ...f, Accent: e.target.value }))} />
+                </div>
+                <div>
+                  <label>Навыки</label>
+                  <input value={editFields.Skills}
+                    onChange={(e) => setEditFields(f => ({ ...f, Skills: e.target.value }))} />
+                </div>
+              </div>
+              <label>Текст плана</label>
+              <textarea value={editFields.Plan} style={{ minHeight: 200 }}
+                onChange={(e) => setEditFields(f => ({ ...f, Plan: e.target.value }))} />
+              <div className="row" style={{ marginTop: 10 }}>
+                <button onClick={() => saveEdit(p.id)}>Сохранить</button>
+                <button className="ghost" style={{ marginTop: 16 }}
+                  onClick={() => setEditingId(null)}>Отмена</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="plan__head">
+                <span className="pill pill--accent">{p.accent || "—"}</span>
+                {p.skills && <span className="pill">{p.skills}</span>}
+                {p.status && <span className="pill">{p.status}</span>}
+                <span className="plan__when">
+                  {p.created_at ? new Date(p.created_at).toLocaleString("ru-RU") : ""}
+                </span>
+                <button className="ghost" style={{ marginLeft: "auto" }}
+                  onClick={() => startEdit(p)}>Изменить</button>
+              </div>
+              <div className="plan__text">{p.plan}</div>
+            </>
+          )}
         </div>
       ))}
     </div>

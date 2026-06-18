@@ -9,7 +9,26 @@ export function StructuresPage() {
   const fetcher = useCallback(() => structuresApi.list(), []);
   const { data, loading, error, reload } = useResource(fetcher);
   const toast = useToast();
+
   const [structure, setStructure] = useState("");
+
+  const [editingId, setEditingId] = useState(null);
+  const [editStructure, setEditStructure] = useState("");
+
+  function startEdit(s) {
+    setEditingId(s.id);
+    setEditStructure(s.structure);
+  }
+
+  async function saveEdit(id) {
+    if (!editStructure.trim()) { return; }
+    try {
+      await structuresApi.update(id, { structure: editStructure });
+      toast("Сохранено", "ok");
+      setEditingId(null);
+      reload();
+    } catch (e) { toast(e.message, "error"); }
+  }
 
   async function create() {
     if (!structure.trim()) {
@@ -40,7 +59,8 @@ export function StructuresPage() {
       <div className="card">
         <h2>Новая структура</h2>
         <label>Описание секций</label>
-        <textarea value={structure} onChange={(e) => setStructure(e.target.value)} placeholder="Кардио разминка, силовая часть, выносливость, пресс" />
+        <textarea value={structure} onChange={(e) => setStructure(e.target.value)}
+          placeholder="Кардио разминка, силовая часть, выносливость, пресс" />
         <button onClick={create}>Создать</button>
       </div>
 
@@ -50,12 +70,31 @@ export function StructuresPage() {
         {error && <ErrorMsg message={error} />}
         {!loading && !error && data.length === 0 && <Empty>Пока пусто.</Empty>}
         {data.map((s) => (
-          <div className="item" key={s.id}>
-            <div className="item__main">
-              {s.structure}
-              <div className="item__meta"><ShortId id={s.id} /></div>
-            </div>
-            <button className="danger" onClick={() => remove(s.id)}>Удалить</button>
+          <div className="item" key={s.id}
+            style={editingId === s.id ? { flexDirection: "column", alignItems: "stretch" } : undefined}>
+            {editingId === s.id ? (
+              <>
+                <label>Описание секций</label>
+                <textarea value={editStructure}
+                  onChange={(e) => setEditStructure(e.target.value)} />
+                <div className="row" style={{ marginTop: 10 }}>
+                  <button onClick={() => saveEdit(s.id)}>Сохранить</button>
+                  <button className="ghost" style={{ marginTop: 16 }}
+                    onClick={() => setEditingId(null)}>Отмена</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="item__main">
+                  {s.structure}
+                  <div className="item__meta"><ShortId id={s.id} /></div>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button className="ghost" onClick={() => startEdit(s)}>Изменить</button>
+                  <button className="danger" onClick={() => remove(s.id)}>Удалить</button>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>

@@ -14,6 +14,23 @@ export function ExercisesPage() {
   const [position, setPosition] = useState("");
   const [description, setDescription] = useState("");
 
+  const [editingId, setEditingId] = useState(null);
+  const [editFields, setEditFields] = useState({});
+
+  function startEdit(e) {
+    setEditingId(e.id);
+    setEditFields({ muscle: e.muscle, position: e.position || "", description: e.description });
+  }
+
+  async function saveEdit(id) {
+    try {
+      await exercisesApi.update(id, editFields);
+      toast("Сохранено", "ok");
+      setEditingId(null);
+      reload();
+    } catch (e) { toast(e.message, "error"); }
+  }
+
   async function create() {
     if (!muscle || !position || !description) {
       toast("Заполни все поля", "error");
@@ -63,14 +80,45 @@ export function ExercisesPage() {
         {error && <ErrorMsg message={error} />}
         {!loading && !error && data.length === 0 && <Empty>Пока пусто.</Empty>}
         {data.map((e) => (
-          <div className="item" key={e.id}>
-            <div className="item__main">
-              <span className="pill">{e.muscle}</span>
-              {e.position && <span className="pill">{e.position}</span>}
-              {e.description}
-              <div className="item__meta"><ShortId id={e.id} /></div>
-            </div>
-            <button className="danger" onClick={() => remove(e.id)}>Удалить</button>
+          <div className="item" key={e.id}
+            style={editingId === e.id ? { flexDirection: "column", alignItems: "stretch" } : undefined}>
+            {editingId === e.id ? (
+              <>
+                <div className="row">
+                  <div>
+                    <label>Мышца</label>
+                    <input value={editFields.muscle}
+                      onChange={(ev) => setEditFields(f => ({ ...f, muscle: ev.target.value }))} />
+                  </div>
+                  <div>
+                    <label>Позиция</label>
+                    <input value={editFields.position}
+                      onChange={(ev) => setEditFields(f => ({ ...f, position: ev.target.value }))} />
+                  </div>
+                </div>
+                <label>Описание</label>
+                <textarea value={editFields.description}
+                  onChange={(ev) => setEditFields(f => ({ ...f, description: ev.target.value }))} />
+                <div className="row" style={{ marginTop: 10 }}>
+                  <button onClick={() => saveEdit(e.id)}>Сохранить</button>
+                  <button className="ghost" style={{ marginTop: 16 }}
+                    onClick={() => setEditingId(null)}>Отмена</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="item__main">
+                  <span className="pill">{e.muscle}</span>
+                  {e.position && <span className="pill">{e.position}</span>}
+                  {e.description}
+                  <div className="item__meta"><ShortId id={e.id} /></div>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button className="ghost" onClick={() => startEdit(e)}>Изменить</button>
+                  <button className="danger" onClick={() => remove(e.id)}>Удалить</button>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>
