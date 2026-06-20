@@ -27,7 +27,7 @@ export function PlansPage() {
   async function saveEdit(id) {
     try {
       await plansApi.update(id, editFields);
-      toast("Сохранено", "ok");
+      toast("Saved", "ok");
       setEditingId(null);
       reload();
     } catch (e) { toast(e.message, "error"); }
@@ -35,13 +35,13 @@ export function PlansPage() {
 
   return (
     <div>
-      <h1>Планы тренировок</h1>
-      <p className="subtitle">Сгенерированные планы. Список обновляется автоматически.</p>
+      <h1>Training Plans</h1>
+      <p className="subtitle">Generated plans. The list refreshes automatically.</p>
 
       {loading && data.length === 0 && <Loading />}
       {error && <ErrorMsg message={error} />}
       {!loading && !error && data.length === 0 && (
-        <Empty>Пока нет планов. Сгенерируй первый во вкладке «Генерация».</Empty>
+        <Empty>No plans yet. Generate the first one in the Generate tab.</Empty>
       )}
 
       {data.map((p) => (
@@ -50,23 +50,23 @@ export function PlansPage() {
             <>
               <div className="row">
                 <div>
-                  <label>Акцент</label>
+                  <label>Accent</label>
                   <input value={editFields.accent}
                     onChange={(e) => setEditFields(f => ({ ...f, accent: e.target.value }))} />
                 </div>
                 <div>
-                  <label>Навыки</label>
+                  <label>Skills</label>
                   <input value={editFields.skills}
                     onChange={(e) => setEditFields(f => ({ ...f, skills: e.target.value }))} />
                 </div>
               </div>
-              <label>Текст плана</label>
+              <label>Plan text</label>
               <textarea value={editFields.plan} style={{ minHeight: 200 }}
                 onChange={(e) => setEditFields(f => ({ ...f, plan: e.target.value }))} />
               <div className="row" style={{ marginTop: 10 }}>
-                <button onClick={() => saveEdit(p.id)}>Сохранить</button>
+                <button onClick={() => saveEdit(p.id)}>Save</button>
                 <button className="ghost" style={{ marginTop: 16 }}
-                  onClick={() => setEditingId(null)}>Отмена</button>
+                  onClick={() => setEditingId(null)}>Cancel</button>
               </div>
             </>
           ) : (
@@ -76,10 +76,10 @@ export function PlansPage() {
                 {p.skills && <span className="pill">{p.skills}</span>}
                 {p.status && <span className="pill">{p.status}</span>}
                 <span className="plan__when">
-                  {p.created_at ? new Date(p.created_at).toLocaleString("ru-RU") : ""}
+                  {p.created_at ? new Date(p.created_at).toLocaleString("en-GB") : ""}
                 </span>
                 <button className="ghost" style={{ marginLeft: "auto" }}
-                  onClick={() => startEdit(p)}>Изменить</button>
+                  onClick={() => startEdit(p)}>Edit</button>
               </div>
               <div className="plan__text">{p.plan}</div>
             </>

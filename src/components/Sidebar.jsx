@@ -1,11 +1,11 @@
 import { NavLink } from "react-router-dom";
 
 const links = [
-  { to: "/plans", label: "Планы" },
-  { to: "/generate", label: "Генерация" },
-  { to: "/exercises", label: "Упражнения" },
-  { to: "/groups", label: "Группы" },
-  { to: "/structures", label: "Структуры" },
+  { to: "/plans", label: "Plans" },
+  { to: "/generate", label: "Generate" },
+  { to: "/exercises", label: "Exercises" },
+  { to: "/groups", label: "Groups" },
+  { to: "/structures", label: "Structures" },
 ];
 
 export function Sidebar() {

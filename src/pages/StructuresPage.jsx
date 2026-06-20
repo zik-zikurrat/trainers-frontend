@@ -23,7 +23,7 @@ export function StructuresPage() {
     if (!editStructure.trim()) { return; }
     try {
       await structuresApi.update(id, { structure: editStructure });
-      toast("Сохранено", "ok");
+      toast("Saved", "ok");
       setEditingId(null);
       reload();
     } catch (e) { toast(e.message, "error"); }
@@ -31,13 +31,13 @@ export function StructuresPage() {
 
   async function create() {
     if (!structure.trim()) {
-      toast("Введи структуру", "error");
+      toast("Enter a structure", "error");
       return;
     }
     try {
       await structuresApi.create({ structure });
       setStructure("");
-      toast("Структура создана", "ok");
+      toast("Structure created", "ok");
       reload();
     } catch (e) { toast(e.message, "error"); }
   }
@@ -45,41 +45,41 @@ export function StructuresPage() {
   async function remove(id) {
     try {
       await structuresApi.remove(id);
-      toast("Удалено", "ok");
+      toast("Deleted", "ok");
       reload();
     } catch (e) { toast(e.message, "error"); }
   }
 
   return (
     <div>
-      <h1>Структуры</h1>
-      <p className="subtitle">Каркас секций тренировки. Обычно одна на всё.</p>
+      <h1>Structures</h1>
+      <p className="subtitle">Section layout for a training session. Usually one for all.</p>
 
       <div className="card">
-        <h2>Новая структура</h2>
-        <label>Описание секций</label>
+        <h2>New structure</h2>
+        <label>Section description</label>
         <textarea value={structure} onChange={(e) => setStructure(e.target.value)}
-          placeholder="Кардио разминка, силовая часть, выносливость, пресс" />
-        <button onClick={create}>Создать</button>
+          placeholder="Cardio warm-up, strength block, endurance, core" />
+        <button onClick={create}>Create</button>
       </div>
 
       <div className="card">
-        <h2>Все структуры</h2>
+        <h2>All structures</h2>
         {loading && <Loading />}
         {error && <ErrorMsg message={error} />}
-        {!loading && !error && data.length === 0 && <Empty>Пока пусто.</Empty>}
+        {!loading && !error && data.length === 0 && <Empty>Nothing here yet.</Empty>}
         {data.map((s) => (
           <div className="item" key={s.id}
             style={editingId === s.id ? { flexDirection: "column", alignItems: "stretch" } : undefined}>
             {editingId === s.id ? (
               <>
-                <label>Описание секций</label>
+                <label>Section description</label>
                 <textarea value={editStructure}
                   onChange={(e) => setEditStructure(e.target.value)} />
                 <div className="row" style={{ marginTop: 10 }}>
-                  <button onClick={() => saveEdit(s.id)}>Сохранить</button>
+                  <button onClick={() => saveEdit(s.id)}>Save</button>
                   <button className="ghost" style={{ marginTop: 16 }}
-                    onClick={() => setEditingId(null)}>Отмена</button>
+                    onClick={() => setEditingId(null)}>Cancel</button>
                 </div>
               </>
             ) : (
@@ -88,8 +88,8 @@ export function StructuresPage() {
                   {s.structure}
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button className="ghost" onClick={() => startEdit(s)}>Изменить</button>
-                  <button className="danger" onClick={() => remove(s.id)}>Удалить</button>
+                  <button className="ghost" onClick={() => startEdit(s)}>Edit</button>
+                  <button className="danger" onClick={() => remove(s.id)}>Delete</button>
                 </div>
               </>
             )}

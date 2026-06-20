@@ -31,7 +31,7 @@ export function GeneratePage() {
   function startPolling(taskId, deadline) {
     if (Date.now() > deadline) {
       setBusy(false);
-      toast("Превышено время ожидания генерации", "error");
+      toast("Generation timed out", "error");
       return;
     }
     pollRef.current = setTimeout(async () => {
@@ -39,10 +39,10 @@ export function GeneratePage() {
         const { status } = await plansApi.getTask(taskId);
         if (status === "DONE") {
           setBusy(false);
-          toast("Генерация завершена успешно", "ok");
+          toast("Generation completed successfully", "ok");
         } else if (status === "ERROR") {
           setBusy(false);
-          toast("Ошибка генерации", "error");
+          toast("Generation failed", "error");
         } else {
           startPolling(taskId, deadline);
         }
@@ -53,13 +53,13 @@ export function GeneratePage() {
   }
 
   async function generate() {
-    if (!trainType) { toast("Введи тип тренировки", "error"); return; }
-    if (!structureId) { toast("Выбери структуру", "error"); return; }
+    if (!trainType) { toast("Enter a training type", "error"); return; }
+    if (!structureId) { toast("Select a structure", "error"); return; }
     stopPolling();
     setBusy(true);
     try {
       const { task_id } = await plansApi.generate({ train_type: trainType, structure_id: structureId });
-      toast("Генерация запущена…", "ok");
+      toast("Generation started…", "ok");
       startPolling(task_id, Date.now() + POLL_TIMEOUT);
     } catch (e) {
       setBusy(false);
@@ -69,29 +69,29 @@ export function GeneratePage() {
 
   return (
     <div>
-      <h1>Генерация плана</h1>
-      <p className="subtitle">Акцент чередуется автоматически по истории группы. Генерация идёт в фоне.</p>
+      <h1>Generate Plan</h1>
+      <p className="subtitle">Accent rotates automatically based on group history. Generation runs in the background.</p>
 
       <div className="card">
-        <h2>Параметры</h2>
+        <h2>Parameters</h2>
         {(groups.loading || structures.loading) && <Loading />}
 
-        <label>Тип тренировки (название группы)</label>
+        <label>Training type (group name)</label>
         <input list="groups-list" value={trainType} onChange={(e) => setTrainType(e.target.value)} placeholder="upper body" />
         <datalist id="groups-list">
           {groups.data.map((g) => <option key={g.id} value={g.name} />)}
         </datalist>
 
-        <label>Структура</label>
+        <label>Structure</label>
         <select value={structureId} onChange={(e) => setStructureId(e.target.value)}>
-          <option value="">— выбери —</option>
+          <option value="">— select —</option>
           {structures.data.map((s) => (
             <option key={s.id} value={s.id}>{(s.structure || "").slice(0, 60)}</option>
           ))}
         </select>
 
         <button onClick={generate} disabled={busy}>
-          {busy ? "Запуск…" : "Сгенерировать →"}
+          {busy ? "Running…" : "Generate →"}
         </button>
       </div>
     </div>
