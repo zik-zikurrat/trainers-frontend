@@ -4,13 +4,10 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    ports:
-      - "80:80"         
     restart: unless-stopped
     networks:
-      - backend_net
-
+      - web
 networks:
-  backend_net:
+  web:
     external: true
-    name: trainers-manager_training_net 
+    name: trainers-manager_training_net
